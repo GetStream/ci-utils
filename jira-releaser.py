@@ -10,7 +10,7 @@ from datetime import date
 
 class Jira(object):
 
-    def __init__(self, project_key: str, email: str, api_key: str, jira_url: str):
+    def __init__(self, project_key, email, api_key, jira_url):
         self.project_key = project_key
         self.email = email
         self.api_key = api_key
