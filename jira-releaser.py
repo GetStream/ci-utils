@@ -113,7 +113,9 @@ def find_previous_version_tag(version):
         ["git", "tag", "--sort", "-v:refname", "-l", "v[0-9]*"]
     ).strip()
     tags = [t.decode("utf-8") for t in output.split(b"\n")]
-    tags = [t for t in tags if "-" not in t or t == version]
+
+    # exclude version like this one v1.0.0-beta
+    tags = [t for t in tags if "-" not in t]
 
     if version not in tags:
         print(f"{version} not found in current list of tags")
