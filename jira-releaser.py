@@ -9,6 +9,7 @@ from datetime import date
 
 
 class Jira(object):
+
     def __init__(self, project_key, email, api_key, jira_url):
         self.project_key = project_key
         self.email = email
@@ -43,7 +44,9 @@ class Jira(object):
         ).encode("utf-8")
 
         req = urllib.request.Request(
-            f"{self.jira_url}/rest/api/2/issue/{issue_id}", payload, method="PUT"
+            f"{self.jira_url}/rest/api/2/issue/{issue_id}",
+            payload,
+            method="PUT",
         )
 
         self.add_jira_auth(req)
@@ -53,7 +56,7 @@ class Jira(object):
 
     def assert_version(self, version):
         print(f"get or create version {version} for {self.project_key}")
-
+    
         payload = json.dumps(
             {
                 "archived": False,
@@ -63,9 +66,11 @@ class Jira(object):
                 "released": True,
             }
         ).encode("utf-8")
-        req = urllib.request.Request(f"{self.jira_url}/rest/api/2/version", payload)
+        req = urllib.request.Request(
+            f"{self.jira_url}/rest/api/2/version", payload
+        )
         self.add_jira_auth(req)
-
+    
         try:
             with urllib.request.urlopen(req) as response:
                 json.loads(response.read())
@@ -79,6 +84,7 @@ class Jira(object):
 
 
 class Github(object):
+    
     def __init__(self, repo_owner, repo_name, token):
         self.token = token
         self.repo_owner = repo_owner
@@ -87,22 +93,18 @@ class Github(object):
     def get_jira_id_from_pr(self, jira_project_key, pr_id):
         encoded_credentials = base64.b64encode(f"{self.token}:".encode("ascii"))
         url = f"https://api.github.com/repos/{self.repo_owner}/{self.repo_name}/pulls/{pr_id}"
-
+    
         req = urllib.request.Request(url)
-        req.add_header(
-            "Authorization", "Basic %s" % encoded_credentials.decode("ascii")
-        )
-
+        req.add_header("Authorization", "Basic %s" % encoded_credentials.decode("ascii"))
+    
         jira_issue_ids = []
-
+    
         with urllib.request.urlopen(req) as response:
             body = response.read()
             data = json.loads(body)
             jira_issue_ids += re.findall(f"{jira_project_key}-[\d]+", data["title"])
-            jira_issue_ids += re.findall(
-                f"{jira_project_key}-[\d]+", data["head"]["ref"]
-            )
-
+            jira_issue_ids += re.findall(f"{jira_project_key}-[\d]+", data["head"]["ref"])
+    
         return jira_issue_ids
 
 
@@ -147,7 +149,12 @@ def main():
 
     args = parser.parse_args()
 
-    subprocess.check_output(["git", "fetch", "--unshallow"])
+    try:
+        print("git fetch --unshallow")
+        out = subprocess.check_output(["git", "fetch", "--unshallow"])
+        print(out.decode("utf-8"))
+    except subprocess.CalledProcessError:
+        pass
 
     version = args.version
     if not version:
@@ -158,9 +165,7 @@ def main():
         )
 
     github = Github(args.github_repo_owner, args.github_repo_name, args.github_token)
-    jira = Jira(
-        args.jira_project_key, args.jira_email, args.jira_api_key, args.jira_url
-    )
+    jira = Jira(args.jira_project_key, args.jira_email, args.jira_api_key, args.jira_url)
 
     jira.load_project()
 
@@ -175,7 +180,10 @@ def main():
 
     jira_issue_ids = []
     for pr_id in merged_prs:
-        jira_issue_ids += github.get_jira_id_from_pr(args.jira_project_key, pr_id)
+        jira_issue_ids += github.get_jira_id_from_pr(
+            args.jira_project_key,
+            pr_id,
+        )
 
     jira_issue_ids = list(set(jira_issue_ids))
     print(f"found these Jira IDs for this release {jira_issue_ids}")
