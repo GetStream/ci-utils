@@ -164,8 +164,8 @@ def main():
 
     prev_version = find_previous_version_tag(version)
     if prev_version is None:
-        print(f"did not find a version before {version}")
-        sys.exit(0)
+        print(f"did not find a version before {version}, fall back to last 100 commits")
+        prev_version = f"{version}~100"
 
     merged_prs = list_merged_prs(prev_version, version)
 
