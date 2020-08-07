@@ -152,7 +152,7 @@ def main():
     args = parser.parse_args()
 
     try:
-        print("git fetch --unshallow")
+        print("git fetch --unshallow --tags")
         out = subprocess.check_output(["git", "fetch", "--unshallow"])
         print(out.decode("utf-8"))
     except subprocess.CalledProcessError:
