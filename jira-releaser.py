@@ -108,7 +108,7 @@ class Github(object):
 
 def find_previous_version_tag(version):
     output = subprocess.check_output(
-        ["git", "tag", "--sort", "-v:refname", "-l", "v[0-9]*"]
+        ["git", "tag", "--sort", "-v:refname", "-l", "*v[0-9]*"]
     ).strip()
     tags = [t.decode("utf-8") for t in output.split(b"\n")]
 
