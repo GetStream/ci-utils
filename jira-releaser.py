@@ -170,7 +170,7 @@ def main():
             .strip()
             .decode("utf-8")
         )
-    if not re.match("^v\d+\.\d+\.\d+$", version):
+    if not re.match("^v\d+\.\d+\.\d+(\.\d+)?$", version):
         return
 
     github = Github(args.github_repo_owner, args.github_repo_name, args.github_token)
