@@ -48,8 +48,12 @@ class Jira(object):
 
         self.add_jira_auth(req)
 
-        with urllib.request.urlopen(req) as response:
-            response.read()
+        try:
+            with urllib.request.urlopen(req) as response:
+                response.read()
+        except urllib.error.HTTPError as e:
+            print(f"unable to mark the issue {issue_id} as fixed, this can happen if git log references a Jira ID that does not exist anymore")
+            print(e)
 
     def assert_version(self, version):
         print(f"get or create version {version} for {self.project_key}")
